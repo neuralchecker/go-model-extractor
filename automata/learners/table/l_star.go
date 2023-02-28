@@ -1,6 +1,8 @@
 package table
 
 import (
+	"context"
+
 	"github.com/neuralchecker/go-adt/set"
 	"github.com/neuralchecker/go-automata/automata"
 	"github.com/neuralchecker/go-automata/base_types/sequences"
@@ -23,8 +25,8 @@ type LStarLearner[T any] struct {
 	modelTranslator translators.FaTranslator[T]
 }
 
-// This is just a way to make sure that LStarLearner implements learners.Learner.
-var _ learners.Learner[int] = &LStarLearner[int]{}
+// This is just a way to make sure that LStarLearner implements learners.FullLearner[T].
+var _ learners.FullLearner[int] = &LStarLearner[int]{}
 
 // NewLStarLearner is the same as using a pointer to the zero value of LStarLearner[T].
 func NewLStarLearner[T any]() *LStarLearner[T] {
@@ -50,17 +52,71 @@ func (l *LStarLearner[T]) GetName() string {
 	return l.Name
 }
 
+func (l *LStarLearner[T]) LearnCtx(ctx context.Context, teacher learners.Teacher[T]) (learners.LearningResult[T], error) {
+	type learnResult struct {
+		oTable *otables.LStarTable[T]
+		model  automata.FiniteAutomaton[T]
+		err    error
+	}
+	result := learners.LearningResult[T]{Info: make(map[string]any)}
+	output := make(chan learnResult)
+	go func() {
+		oTable, model, err := l.learn(teacher)
+		output <- learnResult{oTable, model, err}
+	}()
+
+	// PRE
+	l.runPre(&result)
+
+	// Loop until we get a result or the context is done.
+	for {
+		select {
+		// If the context is done, return the result and the error.
+		case <-ctx.Done():
+			return result, ctx.Err()
+
+		// If we get a result, return it.
+		case res := <-output:
+			// If there was an error, return it.
+			if res.err != nil {
+				return result, res.err
+			}
+			// Otherwise, load the result.
+
+			l.loadResult(&result, res.model, teacher, res.oTable)
+			// POST
+			l.runPost(&result)
+			return result, nil
+		}
+	}
+}
+
 // Learn implements learners.Learner
 func (l *LStarLearner[T]) Learn(teacher learners.Teacher[T]) (learners.LearningResult[T], error) {
 	var (
 		result = learners.LearningResult[T]{Info: make(map[string]any)}
-		equals = false
-		model  automata.FiniteAutomaton[T]
 	)
 	// PRE
 	l.runPre(&result)
 
 	// LEARN
+	oTable, model, err := l.learn(teacher)
+	if err != nil {
+		return result, err
+	}
+
+	l.loadResult(&result, model, teacher, oTable)
+	// POST
+	l.runPost(&result)
+
+	return result, nil
+}
+
+func (l *LStarLearner[T]) learn(teacher learners.Teacher[T]) (*otables.LStarTable[T], automata.FiniteAutomaton[T], error) {
+	var (
+		equals = false
+		model  automata.FiniteAutomaton[T]
+	)
 	name := l.GetName()
 	oTable := otables.NewLStarTable[T]()
 	l.initializeOTable(oTable, teacher)
@@ -73,22 +129,17 @@ func (l *LStarLearner[T]) Learn(teacher learners.Teacher[T]) (learners.LearningR
 		l.makeOTableConsistent(oTable, teacher)
 		model, err = l.modelTranslator.Translate(name, oTable, teacher.GetAlphabet())
 		if err != nil {
-			return result, err
+			return oTable, model, err
 		}
 		counterExample, equals, err = teacher.EquivalenceQuery(model)
 		if err != nil {
-			return result, err
+			return oTable, model, err
 		}
 		if !equals {
 			l.updateOTableWithCounterExample(oTable, counterExample, teacher)
 		}
 	}
-
-	l.loadResult(&result, model, teacher, oTable)
-	// POST
-	l.runPost(&result)
-
-	return result, nil
+	return oTable, model, nil
 }
 
 func (l *LStarLearner[T]) closeOTable(oTable *otables.LStarTable[T], teacher learners.Teacher[T]) {

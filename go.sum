@@ -8,10 +8,10 @@ github.com/hashicorp/errwrap v1.0.0 h1:hLrqtEDnRye3+sgx6z4qVLNuviH3MR5aQ0ykNJa/U
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
 github.com/hashicorp/go-multierror v1.1.1 h1:H5DkEtf6CXdFp0N0Em5UCwQpXMWke8IA0+lD48awMYo=
 github.com/hashicorp/go-multierror v1.1.1/go.mod h1:iw975J/qwKPdAO1clOe2L8331t/9/fmwbPZ6JB6eMoM=
-github.com/neuralchecker/go-automata v0.0.0-20230223003122-be3fc192882a h1:dQCd34QJVEN1PhY9r0dQWIge7dv9JtiQJL3RiNCHq5I=
-github.com/neuralchecker/go-automata v0.0.0-20230223003122-be3fc192882a/go.mod h1:2cGclPCivTMakRTraNFpn7RmRRHzAM4qQxWIENf00rw=
-github.com/neuralchecker/go-automata v0.2.0 h1:8QYJWXlBGq5A3JjkRqKB0vUhXs2N5DtBF6cz/9fI8iM=
-github.com/neuralchecker/go-automata v0.2.0/go.mod h1:2cGclPCivTMakRTraNFpn7RmRRHzAM4qQxWIENf00rw=
+github.com/neuralchecker/go-adt v0.3.0 h1:NRG+n99La3pTMHMZQRiTsKZn8AzppSnnlzxeB1Y2zs4=
+github.com/neuralchecker/go-adt v0.3.0/go.mod h1:iGYJZbRvkWI3jqVnb+Z57FeFqa6wKWZkv52do5VTYHo=
+github.com/neuralchecker/go-automata v0.2.1 h1:LrdCN/ttg9Grll/UJ0ACuDJdZrtb0Tq5RGu17oaj1oI=
+github.com/neuralchecker/go-automata v0.2.1/go.mod h1:2cGclPCivTMakRTraNFpn7RmRRHzAM4qQxWIENf00rw=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

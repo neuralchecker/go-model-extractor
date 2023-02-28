@@ -1,12 +1,23 @@
 package learners
 
 import (
+	"context"
+
 	"github.com/neuralchecker/go-automata/automata"
 	"github.com/neuralchecker/go-automata/interfaces"
 )
 
 type Learner[T any] interface {
 	Learn(Teacher[T]) (LearningResult[T], error)
+}
+
+type LearnerCtx[T any] interface {
+	LearnCtx(ctx context.Context, teacher Teacher[T]) (LearningResult[T], error)
+}
+
+type FullLearner[T any] interface {
+	Learner[T]
+	LearnerCtx[T]
 }
 
 type Teacher[T any] interface {
